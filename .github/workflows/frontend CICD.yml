@@ -64,8 +64,8 @@ jobs:
     
       - name: Set user information
         run: |
-          git config user.email "cloudevsecops@gmail.com"
-          git config user.name "cloudevsecops"
+          git config user.email "you@example.com"
+          git config user.name "Your Name"
     
       - name: Create and switch to main branch
         run: |
@@ -82,7 +82,7 @@ jobs:
         run: |
           S3_BUCKET_URL=$(aws cloudformation describe-stacks --stack-name beatoncloud-stack --query "Stacks[0].Outputs[?OutputKey=='DeploytoCloudFront'].OutputValue" --output text)
           echo "$S3_BUCKET_URL" > s3sync.sh
-          sed -i 's/environment\/personalizeworkshop/work\/BeatOnCloud-Personalize\/BeatOnCloud-Personalize/g' s3sync.sh
+          sed -i 's|environment/personalizeworkshop|work/BeatOnCloud-Personalize/BeatOnCloud-Personalize|g' s3sync.sh
 
       - name: Deploy to S3
         run: sh s3sync.sh
