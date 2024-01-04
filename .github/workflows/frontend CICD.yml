@@ -1,10 +1,9 @@
-name: Frontend CICD
+name: Frontend CI
 
 on:
   push:
     branches:
       - develop
-      - main
 
 jobs:
   build:
@@ -55,28 +54,26 @@ jobs:
           CI: ""
 
   merge_to_main:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+
     steps:
-      - name: Merge to Main
-        run: git merge origin/main
+      - name: Checkout repository
+        uses: actions/checkout@v3
+    
+      - name: Merge develop into main
+        run: git merge --no-ff origin/develop
+    
+      - name: Push changes to main
+        run: |
+          git push origin main
+          
+      - name: Get S3 Bucket URL
+        run: |
+          S3_BUCKET_URL=$(aws cloudformation describe-stacks --stack-name beatoncloud-stack --query "Stacks[0].Outputs[?OutputKey=='DeploytoCloudFront'].OutputValue" --output text)
+          echo "$S3_BUCKET_URL" > s3sync.sh
+          sed -i 's/environment\/personalizeworkshop/work\/BeatOnCloud-Personalize\/BeatOnCloud-Personalize/g' s3sync.sh
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
-    - name: Merge develop into main
-      run: git merge --no-ff origin/develop
-    
-    - name: Push changes to main
-      run: |
-        git push origin main
-
-    - name: Get S3 Bucket URL
-      run: |
-        S3_BUCKET_URL=$(aws cloudformation describe-stacks --stack-name beatoncloud-stack --query "Stacks[0].Outputs[?OutputKey=='DeploytoCloudFront'].OutputValue" --output text)
-        echo "$S3_BUCKET_URL" > s3sync.sh
-        sed -i 's/environment\/personalizeworkshop/work\/BeatOnClouc-Personalize\/BeatOnCloud-Personalize/g' s3sync.sh
-    
-    - name: Deploy to S3
-      run: sh s3sync.sh
+      - name: Deploy to S3
+        run: sh s3sync.sh
