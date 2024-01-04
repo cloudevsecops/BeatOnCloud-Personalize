@@ -62,10 +62,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
     
-      - name: Merge develop into main
+      - name: Create and switch to main branch
         run: |
-          git fetch origin main
-          git reset --hard origin/main
+          git checkout -b main
+          git add .
+          git commit -m "Initial commit for main branch"
           git push origin main
     
       - name: Get S3 Bucket URL
