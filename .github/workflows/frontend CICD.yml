@@ -71,8 +71,12 @@ jobs:
         run: |
           git checkout -b main
           git add .
-          git commit -m "Initial commit for main branch"
-          git push origin main
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit"
+          else
+            git commit -m "Initial commit for main branch"
+            git push origin main
+          fi
     
       - name: Get S3 Bucket URL
         run: |
