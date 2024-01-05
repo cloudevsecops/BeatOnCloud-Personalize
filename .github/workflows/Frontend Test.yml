@@ -2,14 +2,11 @@ name: Frontend CICD
 
 on:
   pull_request:
-    types:
-      - closed
     branches:
-      - main
+      - develop
 
 jobs:
   build:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     strategy:
@@ -54,12 +51,3 @@ jobs:
         run: npm run build
         env: 
           CI: ""
-    
-      - name: Get S3 Bucket URL
-        run: |
-          S3_BUCKET_URL=$(aws cloudformation describe-stacks --stack-name beatoncloud-stack --query "Stacks[0].Outputs[?OutputKey=='DeploytoCloudFront'].OutputValue" --output text)
-          echo "$S3_BUCKET_URL" > s3sync.sh
-          sed -i 's/environment\/personalizeworkshop/work\/BeatOnCloud-Personalize\/BeatOnCloud-Personalize/g' s3sync.sh
-    
-      - name: Deploy to S3
-        run: sh s3sync.sh
