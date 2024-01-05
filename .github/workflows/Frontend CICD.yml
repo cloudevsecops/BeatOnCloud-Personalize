@@ -35,11 +35,10 @@ jobs:
         run: npm ci
     
       - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: aws configure
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} &&
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} &&
+          aws configure set region ${{ secrets.AWS_REGION }}
     
       - name: Add execute permission to the script
         run: chmod +x uploadDataToDynamoDB.sh
@@ -61,7 +60,7 @@ jobs:
         run: |
           S3_BUCKET_URL=$(aws cloudformation describe-stacks --stack-name beatoncloud-stack --query "Stacks[0].Outputs[?OutputKey=='DeploytoCloudFront'].OutputValue" --output text)
           echo "$S3_BUCKET_URL" > s3sync.sh
-          sed -i 's/environment\/personalizeworkshop/work\/BeatOnCloud-Personalize\/BeatOnCloud-Personalize/g' s3sync.sh
+          sed -i 's/environment\/personalizeworkshop/work\/BeatOnCloud\/BeatOnCloud/g' s3sync.sh
     
       - name: Deploy to S3
         run: sh s3sync.sh
